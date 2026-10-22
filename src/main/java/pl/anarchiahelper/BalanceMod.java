@@ -26,7 +26,7 @@ public class BalanceMod implements ClientModInitializer {
     static final boolean HIDE_REPLY = true;
 
     /** Minimalny odstep miedzy zapytaniami (ms) - ochrona przed spamem komendami. */
-    static final long COOLDOWN_MS = 2000;
+    static final long COOLDOWN_MS = 5;
 
     /** Ile ms czekamy na odpowiedz serwera. */
     static final long REPLY_TIMEOUT_MS = 3000;
