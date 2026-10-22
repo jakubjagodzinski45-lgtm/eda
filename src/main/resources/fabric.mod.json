@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "id": "balance_peek",
+  "version": "${version}",
+  "name": "Balance Peek",
+  "description": "Srodkowy przycisk myszy na graczu pokazuje jego stan konta.",
+  "environment": "client",
+  "entrypoints": {
+    "client": ["pl.anarchiahelper.BalanceMod"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.4",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
