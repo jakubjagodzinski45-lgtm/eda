@@ -17,7 +17,7 @@ public class BalanceMod implements ClientModInitializer {
     // ================= USTAWIENIA (zmien pod serwer) =================
 
     /** Komenda sprawdzajaca stan konta, BEZ ukosnika. %s = nick gracza. */
-    static final String COMMAND = "bal %s";
+    static final String COMMAND = "stats %s";
 
     /** Regex wyciagajacy kwote z odpowiedzi serwera (pierwsza grupa). */
     static final Pattern BALANCE_PATTERN = Pattern.compile("(\\d[\\d\\s.,]*\\s?[kKmMbB]?)");
