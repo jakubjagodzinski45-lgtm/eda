@@ -34,8 +34,11 @@ public class BalanceMod implements ClientModInitializer {
     /** Zasieg celowania (w blokach). Mod widzi tylko graczy zaladowanych u Ciebie w grze. */
     static final double MAX_DISTANCE = 256;
 
-    /** Tolerancja celowania - im wieksza, tym latwiej trafic w daleka postac. */
-    static final double AIM_TOLERANCE = 0.25;
+    /** Promien "trafienia" wokol srodka postaci (w blokach). Pokrywa cale cialo, od stop po glowe. */
+    static final double BODY_RADIUS = 1.1;
+
+    /** Dodatkowa tolerancja na kazdy blok odleglosci - ulatwia trafianie w dalekich graczy. */
+    static final double AIM_TOLERANCE_PER_BLOCK = 0.02;
 
     /** Linia z GUI /stats, ktora uznajemy za stan konta (sprawdzane bez wielkosci liter). */
     static final Pattern MONEY_LINE = Pattern.compile(
@@ -114,27 +117,28 @@ public class BalanceMod implements ClientModInitializer {
         client.player.networkHandler.sendChatCommand(String.format(COMMAND, nick));
     }
 
-    /** Celowanie w gracza z duzej odleglosci (ignoruje zasieg wbudowany w gre). */
+    /** Celowanie w gracza: trafienie w DOWOLNA czesc ciala, z duzej odleglosci. */
     private PlayerEntity findTarget(MinecraftClient client) {
         Entity cam = client.getCameraEntity();
         if (cam == null) return null;
 
         Vec3d start = cam.getCameraPosVec(1.0f);
-        Vec3d end = start.add(cam.getRotationVec(1.0f).multiply(MAX_DISTANCE));
+        Vec3d dir = cam.getRotationVec(1.0f).normalize();
 
         PlayerEntity best = null;
-        double bestDist = Double.MAX_VALUE;
+        double bestOffset = Double.MAX_VALUE;
         for (PlayerEntity p : client.world.getPlayers()) {
             if (p == client.player) continue;
-            double tol = AIM_TOLERANCE + 0.01 * p.distanceTo(client.player);
-            Box box = p.getBoundingBox().expand(tol);
-            Optional<Vec3d> hit = box.raycast(start, end);
-            if (hit.isPresent()) {
-                double d = start.squaredDistanceTo(hit.get());
-                if (d < bestDist) {
-                    bestDist = d;
-                    best = p;
-                }
+
+            Vec3d toCenter = p.getBoundingBox().getCenter().subtract(start);
+            double along = toCenter.dotProduct(dir);           // jak daleko przed Toba
+            if (along <= 0 || along > MAX_DISTANCE) continue;
+
+            double offset = toCenter.subtract(dir.multiply(along)).length(); // jak daleko od linii celowania
+            double allowed = BODY_RADIUS + AIM_TOLERANCE_PER_BLOCK * along;
+            if (offset <= allowed && offset < bestOffset) {
+                bestOffset = offset;
+                best = p;
             }
         }
         return best;
